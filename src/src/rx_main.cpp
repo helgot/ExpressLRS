@@ -1171,14 +1171,29 @@ bool ICACHE_RAM_ATTR ProcessRFPacket(SX12xxDriverCommon::rx_status const status)
     OTA_Packet_s * const otaPktPtr = (OTA_Packet_s * const)Radio.RXdataBuffer;
     OTA_Packet_s * const otaPktPtrSecond = (OTA_Packet_s * const)Radio.RXdataBufferSecond;
 
+    /*
+        Print packet bytes: 
+    */
+    constexpr size_t kPacketSize = sizeof(OTA_Packet_s);
+    for(size_t i = 0; i < kPacketSize; ++i)
+    {
+       DBG("%x", *(reinterpret_cast<uint8_t*>(otaPktPtr) + i)); 
+    }
+    DBGLN(""); 
+
+
     if (!OtaValidatePacketCrc(otaPktPtr))
     {
-        DBGVLN("CRC error");
+        DBGLN("CRC error");
         #if defined(DEBUG_RX_SCOREBOARD)
             lastPacketCrcError = true;
         #endif
         return false;
+    } else {
+
+        DBGLN("CRC match");
     }
+
 
     PFDloop.extEvent(beginProcessing + PACKET_TO_TOCK_SLACK);
 
